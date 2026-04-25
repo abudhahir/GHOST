@@ -1,6 +1,6 @@
 {
   "name": "get-ghost",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Fetch and install AI agents, skills, instructions and rules from any git repository",
   "author": "cleveloper",
   "license": "MIT",
