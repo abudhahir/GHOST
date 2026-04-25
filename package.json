@@ -1,7 +1,28 @@
 {
-  "name": "ghost-installer",
+  "name": "get-ghost",
   "version": "0.1.0",
-  "description": "NPX/NPM AI agent resource installer",
+  "description": "Fetch and install AI agents, skills, instructions and rules from any git repository",
+  "author": "cleveloper",
+  "license": "MIT",
+  "homepage": "https://github.com/abudhahir/GHOST#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/abudhahir/GHOST.git"
+  },
+  "bugs": {
+    "url": "https://github.com/abudhahir/GHOST/issues"
+  },
+  "keywords": [
+    "agentic",
+    "ai-agents",
+    "custom-agents",
+    "skills",
+    "instructions",
+    "rules",
+    "claude",
+    "llm",
+    "npx"
+  ],
   "type": "module",
   "bin": { "ghost": "./dist/index.js" },
   "main": "./dist/index.js",
