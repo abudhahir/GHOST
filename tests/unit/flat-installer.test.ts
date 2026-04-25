@@ -37,6 +37,19 @@ describe('resolveDestinations (flat mode collision resolution)', () => {
     expect(new Set(destNames).size).toBe(3)
   })
 
+  it('deep path collision uses ALL intermediate segments joined with underscores', () => {
+    const files = [
+      makeFile('agents/coding/refactor.agent.md'),
+      makeFile('agents/coding/deep/refactor.agent.md'),
+    ]
+    const result = resolveDestinations(files, '.ghost/')
+    const destNames = result.map(r => r.dest)
+    // First file takes the simple basename
+    expect(destNames).toContain('.ghost/refactor.agent.md')
+    // Second file must include ALL intermediate segments: coding + deep
+    expect(destNames).toContain('.ghost/coding_deep_refactor.agent.md')
+  })
+
   it('normalises dest path without trailing slash', () => {
     const files = [makeFile('agents/foo.md')]
     const result = resolveDestinations(files, '.ghost')

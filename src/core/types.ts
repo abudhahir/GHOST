@@ -82,3 +82,10 @@ export interface MergedConfig {
   token?: string
   hostType?: HostType
 }
+
+export class GhostFetchError extends Error {
+  constructor(message: string, public readonly exitCode: 1 | 2 = 2) {
+    super(message)
+    this.name = 'GhostFetchError'
+  }
+}

@@ -2,6 +2,7 @@
 
 import { fetch } from 'undici'
 import pLimit from 'p-limit'
+import { GhostFetchError } from '../core/types.js'
 import type { DetectedHost, Category, ResolvedFile } from '../core/types.js'
 
 export interface DownloadInput {
@@ -32,7 +33,7 @@ export function buildRawUrl(host: DetectedHost, filePath: string): string {
     case 'gitea':
       return `${host.apiBase}/repos/${host.owner}/${host.repo}/raw/${filePath}?ref=HEAD`
     default:
-      throw new Error(`Cannot build raw URL for host type: ${(host as DetectedHost).type}`)
+      throw new GhostFetchError(`Cannot build raw URL for host type: ${(host as DetectedHost).type}`)
   }
 }
 

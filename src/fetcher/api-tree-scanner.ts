@@ -1,14 +1,10 @@
 // src/fetcher/api-tree-scanner.ts
 
 import { fetch } from 'undici'
+import { GhostFetchError } from '../core/types.js'
 import type { DetectedHost } from '../core/types.js'
 
-export class GhostFetchError extends Error {
-  constructor(message: string, public readonly exitCode: 2 = 2) {
-    super(message)
-    this.name = 'GhostFetchError'
-  }
-}
+export { GhostFetchError }
 
 function authHeader(
   token: string | undefined,

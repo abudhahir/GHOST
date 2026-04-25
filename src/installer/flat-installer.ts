@@ -42,19 +42,34 @@ export function resolveDestinations(
     let candidate = join(normalised, name)
 
     if (taken.has(candidate)) {
-      // Strategy 1 – prefix with the immediate parent directory segment.
-      // e.g. agents/search/refactor.agent.md → search_refactor.agent.md
+      // Strategy 1 – prefix with ALL intermediate directory segments between
+      // the category root (first segment) and the final basename, joined with
+      // underscores.
+      //
+      // For paths with only two segments (category/basename) there are no
+      // intermediate segments, so fall back to the immediate parent (segments[0]).
+      //
+      // Examples:
+      //   agents/search/refactor.agent.md      → search_refactor.agent.md
+      //   agents/coding/deep/refactor.md        → coding_deep_refactor.md
+      //   b/refactor.md                         → b_refactor.md  (2-segment fallback)
       const segments = file.path.split('/')
-      const parentSegment = segments.length >= 2 ? segments[segments.length - 2] : ''
-      const prefixedName = parentSegment ? `${parentSegment}_${name}` : name
+      // segments[0] is the category root; segments[last] is the basename.
+      // Intermediate segments are everything in between.
+      const intermediates = segments.slice(1, segments.length - 1)
+      const prefix =
+        intermediates.length > 0 ? intermediates.join('_') : (segments[0] ?? '')
+      const prefixedName = prefix ? `${prefix}_${name}` : name
       candidate = join(normalised, prefixedName)
     }
 
     // Strategy 2 – numeric suffix if the prefixed name still collides.
     if (taken.has(candidate)) {
       const segments = file.path.split('/')
-      const parentSegment = segments.length >= 2 ? segments[segments.length - 2] : ''
-      const prefixedName = parentSegment ? `${parentSegment}_${name}` : name
+      const intermediates = segments.slice(1, segments.length - 1)
+      const prefix =
+        intermediates.length > 0 ? intermediates.join('_') : (segments[0] ?? '')
+      const prefixedName = prefix ? `${prefix}_${name}` : name
       const base = join(normalised, prefixedName)
       const dotIdx = base.lastIndexOf('.')
       // Only treat a dot as an extension separator when it appears after the

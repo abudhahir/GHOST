@@ -1,9 +1,10 @@
 import { parseKnownHost, buildSelfHostedHost } from '../core/host-detector.js'
 import { probeHost } from './host-prober.js'
-import { fetchTree, GhostFetchError } from './api-tree-scanner.js'
+import { fetchTree } from './api-tree-scanner.js'
 import { downloadFiles } from './file-downloader.js'
 import { fetchViaGit } from './git-fallback.js'
 import { FileFilter } from '../core/file-filter.js'
+import { GhostFetchError } from '../core/types.js'
 import type { FetchConfig, ResolvedFile, DetectedHost } from '../core/types.js'
 
 export { GhostFetchError }
@@ -87,9 +88,14 @@ export async function fetchResources(config: FetchConfig): Promise<FetchResult> 
     }
   }
 
+  // Files that downloaded successfully but were dropped during reclassification
+  // (e.g. frontmatter declared a different category not in the requested list)
+  // must be counted as skipped so callers get an accurate total.
+  const droppedDuringReclassification = succeeded.length - reclassified.length
+
   return {
     files: reclassified,
     failedDownloads,
-    skippedCount: skipped.length,
+    skippedCount: skipped.length + droppedDuringReclassification,
   }
 }
