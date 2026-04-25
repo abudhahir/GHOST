@@ -5,7 +5,17 @@ import { fetchResources, GhostFetchError } from '../fetcher/index.js'
 import { install } from '../installer/index.js'
 import { createDefaultConfigLoader } from '../core/config-loader.js'
 import { KNOWN_CATEGORIES } from '../core/types.js'
-import type { Category, InstallConfig } from '../core/types.js'
+import type { Category, HostType, InstallConfig } from '../core/types.js'
+
+const KNOWN_HOST_TYPES: HostType[] = [
+  'github',
+  'github-enterprise',
+  'gitlab',
+  'bitbucket-cloud',
+  'bitbucket-server',
+  'gitea',
+  'git-fallback',
+]
 
 export async function runCLI(argv: string[]): Promise<void> {
   const cwd = process.cwd()
@@ -46,9 +56,17 @@ export async function runCLI(argv: string[]): Promise<void> {
       let categories: Category[]
       const rawCategories = options.categories ?? fileConfig.categories?.join(',')
       if (rawCategories) {
-        categories = rawCategories === 'all'
-          ? [...KNOWN_CATEGORIES]
-          : (rawCategories.split(',').map(c => c.trim()) as Category[])
+        if (rawCategories === 'all') {
+          categories = [...KNOWN_CATEGORIES]
+        } else {
+          const parsedCategories = rawCategories.split(',').map(c => c.trim())
+          const unknownCats = parsedCategories.filter(c => !KNOWN_CATEGORIES.includes(c as Category))
+          if (unknownCats.length > 0) {
+            process.stderr.write(`Error: unknown categories: ${unknownCats.join(', ')}. Valid values: ${KNOWN_CATEGORIES.join(', ')}\n`)
+            process.exit(2)
+          }
+          categories = parsedCategories as Category[]
+        }
       } else {
         const selected = await checkbox({
           message: 'Categories to install:',
@@ -75,12 +93,19 @@ export async function runCLI(argv: string[]): Promise<void> {
         }
       }
 
+      // Validate --host-type if provided
+      const resolvedHostType = options.hostType ?? fileConfig.hostType
+      if (resolvedHostType !== undefined && !KNOWN_HOST_TYPES.includes(resolvedHostType as HostType)) {
+        process.stderr.write(`Error: unknown host type: ${resolvedHostType}. Valid values: ${KNOWN_HOST_TYPES.join(', ')}\n`)
+        process.exit(2)
+      }
+
       // Fetch files
       const { files, failedDownloads, skippedCount } = await fetchResources({
         repoUrl: repo,
         categories,
         token: options.token ?? fileConfig.token,
-        hostType: (options.hostType ?? fileConfig.hostType) as never,
+        hostType: resolvedHostType as HostType | undefined,
       })
 
       // Pre-install confirmation

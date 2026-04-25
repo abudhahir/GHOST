@@ -4,6 +4,7 @@ import { fetch } from 'undici'
 import pLimit from 'p-limit'
 import { GhostFetchError } from '../core/types.js'
 import type { DetectedHost, Category, ResolvedFile } from '../core/types.js'
+import { authHeader } from './auth.js'
 
 export interface DownloadInput {
   path: string
@@ -37,16 +38,7 @@ export function buildRawUrl(host: DetectedHost, filePath: string): string {
   }
 }
 
-export function authHeader(
-  token: string | undefined,
-  hostType: DetectedHost['type'],
-): Record<string, string> {
-  if (!token) return {}
-  if (hostType === 'bitbucket-cloud') {
-    return { Authorization: `Basic ${Buffer.from(token).toString('base64')}` }
-  }
-  return { Authorization: `Bearer ${token}` }
-}
+export { authHeader }
 
 type DownloadAttempt =
   | { ok: true; path: string; content: string; category: Category }

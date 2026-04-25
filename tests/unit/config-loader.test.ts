@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { mkdtempSync, writeFileSync, mkdirSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { tmpdir } from 'node:os'
@@ -91,5 +91,63 @@ describe('ConfigLoader', () => {
     const loader = new ConfigLoader({ cwd, userConfigDir: join(cwd, 'no-user') })
     const config = await loader.load()
     expect(config.destinations).toEqual(destinations)
+  })
+
+  describe('malformed JSON handling (M1)', () => {
+    it('writes a warning to stderr and returns {} when project config has invalid JSON', async () => {
+      const ghostDir = join(cwd, '.ghost')
+      mkdirSync(ghostDir)
+      writeFileSync(join(ghostDir, 'config.json'), '{ invalid json }')
+
+      // Capture messages via mockImplementation since vi.spyOn mock.calls tracking
+      // is unreliable for process.stderr across module boundaries in vitest workers
+      const captured: string[] = []
+      const stderrSpy = vi.spyOn(process.stderr, 'write').mockImplementation((msg) => {
+        captured.push(String(msg))
+        return true
+      })
+      const loader = new ConfigLoader({ cwd, userConfigDir: join(cwd, 'no-user') })
+      const config = await loader.load()
+      stderrSpy.mockRestore()
+
+      expect(config).toEqual({})
+      expect(captured).toHaveLength(1)
+      expect(captured[0]).toContain('Warning: could not parse config at')
+      expect(captured[0]).toContain('.ghost/config.json')
+    })
+
+    it('writes a warning to stderr and returns {} when user config has invalid JSON', async () => {
+      const userConfigDir = join(cwd, 'user-home')
+      mkdirSync(join(userConfigDir, 'ghost'), { recursive: true })
+      writeFileSync(join(userConfigDir, 'ghost', 'config.json'), '{ not valid json ]')
+
+      const captured: string[] = []
+      const stderrSpy = vi.spyOn(process.stderr, 'write').mockImplementation((msg) => {
+        captured.push(String(msg))
+        return true
+      })
+      const loader = new ConfigLoader({ cwd, userConfigDir })
+      const config = await loader.load()
+      stderrSpy.mockRestore()
+
+      expect(config).toEqual({})
+      expect(captured).toHaveLength(1)
+      expect(captured[0]).toContain('Warning: could not parse config at')
+      expect(captured[0]).toContain('ghost/config.json')
+    })
+
+    it('returns {} without warning when config file does not exist (ENOENT)', async () => {
+      const captured: string[] = []
+      const stderrSpy = vi.spyOn(process.stderr, 'write').mockImplementation((msg) => {
+        captured.push(String(msg))
+        return true
+      })
+      const loader = new ConfigLoader({ cwd, userConfigDir: join(cwd, 'no-user') })
+      const config = await loader.load()
+      stderrSpy.mockRestore()
+
+      expect(config).toEqual({})
+      expect(captured).toHaveLength(0)
+    })
   })
 })

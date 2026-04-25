@@ -40,8 +40,13 @@ export class ConfigLoader {
       // Strip project-scoped keys from user config
       const { installMode: _i, destinations: _d, repo: _r, ...userScoped } = parsed
       return userScoped as UserConfig
-    } catch {
-      return {}
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code === 'ENOENT') return {}
+      if (err instanceof SyntaxError) {
+        process.stderr.write(`Warning: could not parse config at ${path}: ${err.message}\n`)
+        return {}
+      }
+      throw err
     }
   }
 
@@ -50,8 +55,13 @@ export class ConfigLoader {
     try {
       const raw = await readFile(path, 'utf8')
       return JSON.parse(raw) as ProjectConfig
-    } catch {
-      return {}
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code === 'ENOENT') return {}
+      if (err instanceof SyntaxError) {
+        process.stderr.write(`Warning: could not parse config at ${path}: ${err.message}\n`)
+        return {}
+      }
+      throw err
     }
   }
 }

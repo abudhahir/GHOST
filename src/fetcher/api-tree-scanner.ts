@@ -3,19 +3,9 @@
 import { fetch } from 'undici'
 import { GhostFetchError } from '../core/types.js'
 import type { DetectedHost } from '../core/types.js'
+import { authHeader } from './auth.js'
 
 export { GhostFetchError }
-
-function authHeader(
-  token: string | undefined,
-  hostType: DetectedHost['type'],
-): Record<string, string> {
-  if (!token) return {}
-  if (hostType === 'bitbucket-cloud') {
-    return { Authorization: `Basic ${Buffer.from(token).toString('base64')}` }
-  }
-  return { Authorization: `Bearer ${token}` }
-}
 
 async function fetchJson(url: string, headers: Record<string, string>): Promise<unknown> {
   const res = await fetch(url, { headers })

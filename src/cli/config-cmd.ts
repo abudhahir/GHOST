@@ -2,6 +2,7 @@ import { Command } from 'commander'
 import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import { join } from 'node:path'
 import { homedir } from 'node:os'
+import { createDefaultConfigLoader } from '../core/config-loader.js'
 
 const USER_SCOPED_KEYS = new Set(['token', 'hostType', 'categories'])
 const PROJECT_SCOPED_KEYS = new Set(['repo', 'destinations', 'installMode'])
@@ -63,9 +64,8 @@ export function createConfigCommand(cwd: string): Command {
     .command('list')
     .description('Print merged effective configuration')
     .action(async () => {
-      const userConfig = await readJsonFile(userConfigPath())
-      const projectConfig = await readJsonFile(projectConfigPath(cwd))
-      const merged = { ...userConfig, ...projectConfig }
+      const loader = createDefaultConfigLoader(cwd)
+      const merged = await loader.load()
       console.log(JSON.stringify(merged, null, 2))
     })
 
