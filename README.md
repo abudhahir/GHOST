@@ -1,9 +1,9 @@
-# GHOST
+# get-ghost
 
 Fetch and install AI agent resources (agents, skills, prompts, instructions, rules) from any git repository.
 
 ```bash
-npx ghost --repo https://github.com/org/repo --categories agents
+npx get-ghost --repo https://github.com/org/repo --categories agents
 ```
 
 ---
@@ -13,18 +13,18 @@ npx ghost --repo https://github.com/org/repo --categories agents
 No installation required — run directly with `npx`:
 
 ```bash
-npx ghost
+npx get-ghost
 ```
 
-GHOST prompts for the repository URL, categories to install, and install mode if you don't supply flags.
+get-ghost prompts for the repository URL, categories to install, and install mode if you don't supply flags.
 
 ---
 
 ## Usage
 
 ```
-ghost [options]
-ghost config <subcommand>
+get-ghost [options]
+get-ghost config <subcommand>
 ```
 
 ### Options
@@ -44,32 +44,32 @@ ghost config <subcommand>
 
 ```bash
 # Interactive mode — prompts for everything
-npx ghost
+npx get-ghost
 
 # Fetch all agents from a public repo
-npx ghost --repo https://github.com/org/repo --categories agents
+npx get-ghost --repo https://github.com/org/repo --categories agents
 
 # Fetch multiple categories, skip confirmation
-npx ghost --repo https://github.com/org/repo --categories agents,skills -y
+npx get-ghost --repo https://github.com/org/repo --categories agents,skills -y
 
 # Fetch all categories
-npx ghost --repo https://github.com/org/repo --categories all
+npx get-ghost --repo https://github.com/org/repo --categories all
 
 # Private repo with token
-npx ghost --repo https://github.com/org/private --token ghp_xxx --categories agents
+npx get-ghost --repo https://github.com/org/private --token ghp_xxx --categories agents
 
 # Flat install into a specific folder
-npx ghost --repo https://github.com/org/repo --categories agents --dest .claude/agents/
+npx get-ghost --repo https://github.com/org/repo --categories agents --dest .claude/agents/
 
 # Self-hosted GitLab
-npx ghost --repo https://gitlab.internal.co/org/repo --host-type gitlab --categories agents
+npx get-ghost --repo https://gitlab.internal.co/org/repo --host-type gitlab --categories agents
 ```
 
 ---
 
 ## Categories
 
-GHOST recognises five resource categories:
+get-ghost recognises five resource categories:
 
 | Category | What it is |
 |----------|-----------|
@@ -101,7 +101,7 @@ repo/agents/search/refactor.md  →  ./agents/search/refactor.md
 Places all matched files into a single target directory, resolving name collisions with path-based prefixes:
 
 ```bash
-npx ghost --repo https://github.com/org/repo --categories agents --dest .claude/agents/
+npx get-ghost --repo https://github.com/org/repo --categories agents --dest .claude/agents/
 ```
 
 ```
@@ -118,9 +118,9 @@ Persist options so you don't repeat them on every run.
 ### Project config (`.ghost/config.json`)
 
 ```bash
-ghost config set repo https://github.com/org/repo
-ghost config set categories agents,skills
-ghost config set installMode mirror
+get-ghost config set repo https://github.com/org/repo
+get-ghost config set categories agents,skills
+get-ghost config set installMode mirror
 ```
 
 ### User config (`~/.config/ghost/config.json`)
@@ -128,13 +128,13 @@ ghost config set installMode mirror
 User-level defaults apply when no project config is present. Project-scoped keys (`repo`, `installMode`, `destinations`) are ignored in user config.
 
 ```bash
-ghost config set token ghp_xxx        # stored in user config
+get-ghost config set token ghp_xxx        # stored in user config
 ```
 
 ### View merged config
 
 ```bash
-ghost config list
+get-ghost config list
 ```
 
 ### Destinations override
@@ -159,7 +159,7 @@ CLI flags → project `.ghost/config.json` → user `~/.config/ghost/config.json
 
 ## Platform Support
 
-GHOST auto-detects the platform from the repository URL. For self-hosted instances, use `--host-type`:
+get-ghost auto-detects the platform from the repository URL. For self-hosted instances, use `--host-type`:
 
 | Platform | Auto-detected | `--host-type` value |
 |----------|--------------|---------------------|
@@ -171,7 +171,7 @@ GHOST auto-detects the platform from the repository URL. For self-hosted instanc
 | Bitbucket Server | Probed | `bitbucket-server` |
 | Gitea | Probed | `gitea` |
 
-**Probe behaviour:** For unknown hostnames, GHOST fires parallel requests to detect the platform automatically. If probing fails, it falls back to a shallow `git clone`.
+**Probe behaviour:** For unknown hostnames, get-ghost fires parallel requests to detect the platform automatically. If probing fails, it falls back to a shallow `git clone`.
 
 ### Private repositories
 
